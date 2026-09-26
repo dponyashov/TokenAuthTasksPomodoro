@@ -4,12 +4,12 @@ import com.dponyashov.back_java_spring.dto.user.NewUserDto;
 import com.dponyashov.back_java_spring.dto.user.UserDto;
 import com.dponyashov.back_java_spring.entity.UserEntity;
 import com.dponyashov.back_java_spring.exceptions.NotFountException;
-import com.dponyashov.back_java_spring.exceptions.SaveErrorException;
 import com.dponyashov.back_java_spring.mappers.UserMapper;
 import com.dponyashov.back_java_spring.repository.UserRepository;
 import com.dponyashov.back_java_spring.services.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -19,6 +19,7 @@ import java.util.Collection;
 @Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Collection<UserDto> findAll() {
@@ -38,7 +39,8 @@ public class UserServiceImpl implements UserService {
     public UserDto findByUsername(String userName, String password) {
         return userRepository.findAll().stream()
                 .filter(userEntity -> userEntity.getUserName().trim().equalsIgnoreCase(userName.trim()) &&
-                                                userEntity.getUserPassword().trim().equals(password.trim())
+//                                                userEntity.getUserPassword().trim().equals(password.trim())
+                                passwordEncoder.matches(password.trim(), userEntity.getUserPassword().trim())
                 )
                 .findFirst()
                 .map(UserMapper::entityToDto)
@@ -72,7 +74,7 @@ public class UserServiceImpl implements UserService {
                         .userName(user.getUserName())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
-                        .userPassword(user.getPassword())
+                        .userPassword(passwordEncoder.encode(user.getPassword().trim()))
                 .build());
 
         return UserDto.builder()

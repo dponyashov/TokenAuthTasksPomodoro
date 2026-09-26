@@ -69,7 +69,7 @@ export default function RegistryPage() {
           type='text' placeholder="Фамилия"
           value={lastName} onChange={(e)=>setLastName(e.target.value)} />
         <button style={styles.button} disabled={loading}
-          onClick={onClickHandle}>{loading ? 'Загрузка...' : 'Вход'}</button>
+          onClick={onClickHandle}>{loading ? 'Загрузка...' : 'Регистрация'}</button>
       </div>
       <p> Уже есть аккаунт?{' '} <Link to="/login" style={styles.link}>Войдите здесь</Link> </p>
     </div>
