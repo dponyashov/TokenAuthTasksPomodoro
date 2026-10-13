@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import api, { apiPublic } from '../api/AxiosAuthApi';
+import { api, apiPublic } from '../api/AxiosAuthApi';
 
 const TOKEN_NAME = 'token';
 
@@ -9,7 +9,7 @@ function AuthProvider({children}) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [auth, setAuth] = useState(() => {return JSON.parse(sessionStorage.getItem(TOKEN_NAME)) || null });
+    const [auth, setAuth] = useState(() => { return JSON.parse(sessionStorage.getItem(TOKEN_NAME)) || null });
 
     useEffect(()=> {
         if(auth){
@@ -25,14 +25,17 @@ function AuthProvider({children}) {
         setError('');
         try{
             const response = await apiPublic.post('/auth/login', 
-                { userName: login, password: password }, 
+                { email: login, password: password }, 
                 { withCredentials: true });
+
+            console.log(response.data);
+
             setAuth(response.data);
             return true;
         } catch (error) {
             setAuth(null);
-            setError(error.message + ': "' + error.response?.data + '"');         
-            console.log(`login error.response?.data  ${error.response?.data} `);
+            setError(error.message + ': "' + error.response?.data.message + '"');         
+            console.log(`login error.response?.data  ${error.response?.data.message} `);
             return false;
         } finally {
             setLoading(false);
@@ -52,7 +55,7 @@ function AuthProvider({children}) {
             return response.data;
         } catch (error) {
             setAuth(null);
-            setError(error.message + ': "' + error.response?.data + '"');  
+            setError(error.message + ': "' + error.response?.data.message + '"');  
             console.log(`refresh error ${error.response?.data}`);
         } finally {
             setLoading(false);
@@ -66,7 +69,7 @@ function AuthProvider({children}) {
         try{
             const response = await apiPublic.post('/auth/registry', 
                 { 
-                    userName: login, 
+                    email: login, 
                     password: password,
                     firstName: firstName,
                     lastName: lastName
@@ -75,7 +78,7 @@ function AuthProvider({children}) {
             setAuth(response.data);
             return true;
         } catch (error) {
-            setError(error.message + ': "' + error.response?.data + '"');
+            setError(error.message + ': "' + error.response?.data.message + '"');
             setAuth(null);
             return false;
         } finally {
@@ -88,10 +91,10 @@ function AuthProvider({children}) {
         setLoading(true);
         setError('');
         try{
-            await apiPublic.post('/auth/logout', {}, { withCredentials: true });
+            await api.post('/auth/logout', {}, { withCredentials: true });
         } catch (error){
-            setError(error.response?.data);
-            console.log(`logout error ${error.response?.data}`)
+            setError(error.response?.data.message);
+            console.log(`logout error ${error.response?.data?.message}`)
         } finally {
             setAuth(null);
             setLoading(false);
